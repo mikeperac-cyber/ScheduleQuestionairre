@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChronoPrep — Dynamic 7-Day Day Planner</title>
+  <meta name="description" content="Professional, optimized, simple minute-by-minute 7-day day planner for IELTS, SAT, and Portfolio Coding.">
+  
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><polyline points='12 6 12 12 16 14'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #090d16;
+      --card: #111827;
+      --card-hover: #1f2937;
+      --input: #0b1120;
+      --border: #1f2937;
+      --text: #f9fafb;
+      --text-muted: #9ca3af;
+      
+      --accent-ielts: #a78bfa;
+      --accent-sat: #fbbf24;
+      --accent-code: #34d399;
+      --accent-routine: #60a5fa;
+      --accent-break: #f472b6;
+      --accent-fixed: #f87171;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+
+      --radius: 10px;
+      --transition: all 0.2s ease;
+    }
+
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --card-hover: #f1f5f9;
+      --input: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 60px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* SVG Icon Styling */
+    .icon {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .icon-lg {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* Minimal Header */
+    header {
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-icon-box {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+    .btn:hover { background: var(--card-hover); }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+    }
+    .btn-primary:hover { background: var(--primary-hover); }
+
+    .btn-danger {
+      color: #f87171;
+      border-color: rgba(248, 113, 113, 0.3);
+    }
+    .btn-danger:hover {
+      background: rgba(248, 113, 113, 0.1);
+    }
+
+    /* Clean Day Tab Bar */
+    .day-bar {
+      display: flex;
+      gap: 6px;
+      margin: 24px 0;
+      background: var(--card);
+      padding: 6px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    .day-tab {
+      flex: 1;
+      padding: 9px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      transition: var(--transition);
+    }
+    .day-tab:hover { color: var(--text); }
+    .day-tab.active {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* Minimal Card Box */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    /* Form Fields */
+    .grid-4 {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1.2fr;
+      gap: 10px;
+    }
+    @media (max-width: 768px) {
+      .grid-4 { grid-template-columns: 1fr; }
+    }
+
+    .field {
+      margin-bottom: 10px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 8px;
+      background: var(--input);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 0.88rem;
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    /* Quick Preset Buttons */
+    .preset-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      margin-bottom: 14px;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      background: var(--input);
+      color: var(--text);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .chip:hover {
+      border-color: var(--primary);
+      background: var(--card-hover);
+    }
+
+    /* Visual Distribution Bar */
+    .bar-container {
+      height: 12px;
+      background: var(--input);
+      border-radius: 99px;
+      overflow: hidden;
+      display: flex;
+      margin: 10px 0;
+    }
+
+    .bar-seg { height: 100%; }
+
+    /* Timeline Cards */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: grid;
+      grid-template-columns: 24px 130px 1fr 130px;
+      align-items: center;
+      gap: 14px;
+      position: relative;
+      transition: var(--transition);
+    }
+    @media (max-width: 640px) {
+      .item { grid-template-columns: 24px 1fr; gap: 8px; }
+      .item-time { grid-column: 2; }
+      .item-actions { grid-column: 1 / -1; justify-content: flex-end; }
+    }
+
+    .item.done { opacity: 0.5; }
+
+    .item-checkbox {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .item-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+    }
+    .item-dur {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .item-body { flex: 1; }
+
+    .item-title {
+      font-size: 0.92rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.68rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .item-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 32px 20px;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+    }
+
+    /* Notepad */
+    textarea.notes {
+      min-height: 100px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.84rem;
+      resize: vertical;
+    }
+
+    @media print {
+      header, .day-bar, .btn-group, .entry-card, .preset-chips, .item-actions { display: none !important; }
+      body { background: #fff; color: #000; }
+      .card, .item { border: 1px solid #ccc; background: #fff; color: #000; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Minimal Header -->
+  <header>
+    <div class="container nav">
+      <a href="#" class="brand">
+        <div class="brand-icon-box">
+          <svg class="icon icon-lg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        ChronoPrep
+      </a>
+      <div class="btn-group">
+        <button class="btn" id="printBtn">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print / PDF
+        </button>
+        <button class="btn" id="copySummaryBtn">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy Schedule
+        </button>
+        <button class="btn btn-danger" id="clearDayBtn">
+          <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Clear Day
+        </button>
+        <button class="btn" id="themeBtn">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    
+    <!-- Day Navigation Bar -->
+    <div class="day-bar" id="dayBar">
+      <button class="day-tab active" data-day="monday">Mon</button>
+      <button class="day-tab" data-day="tuesday">Tue</button>
+      <button class="day-tab" data-day="wednesday">Wed</button>
+      <button class="day-tab" data-day="thursday">Thu</button>
+      <button class="day-tab" data-day="friday">Fri</button>
+      <button class="day-tab" data-day="saturday">Sat</button>
+      <button class="day-tab" data-day="sunday">Sun</button>
+    </div>
+
+    <!-- Put In Entry Form -->
+    <div class="card entry-card">
+      <div class="card-title">
+        <span style="display:flex; align-items:center; gap:8px;">
+          <svg class="icon" viewBox="0 0 24 24" style="color:var(--primary);"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          Put In New Entry (<span class="dayText">Monday</span>)
+        </span>
+        <span style="font-size:0.78rem; color:var(--text-muted); font-weight:500;">Construct your daily schedule block by block</span>
+      </div>
+
+      <form id="entryForm">
+        <div class="grid-4">
+          <div class="field">
+            <label for="entryTitle">Task Title</label>
+            <input type="text" id="entryTitle" placeholder="e.g. IELTS Writing Essay Task 2" required>
+          </div>
+          <div class="field">
+            <label for="entryStart">Start Time</label>
+            <input type="time" id="entryStart" value="07:00" required>
+          </div>
+          <div class="field">
+            <label for="entryDur">Duration (mins)</label>
+            <input type="number" id="entryDur" min="5" max="360" value="45" required>
+          </div>
+          <div class="field">
+            <label for="entryCat">Category</label>
+            <select id="entryCat">
+              <option value="ielts">IELTS Academic</option>
+              <option value="sat">Digital SAT</option>
+              <option value="code">Portfolio Coding</option>
+              <option value="fixed">Fixed Commitment</option>
+              <option value="routine">Routine / Meal</option>
+              <option value="break">Rest / Buffer</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Quick One-Click Entry Suggestions -->
+        <div style="font-size:0.74rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-top:4px;">Quick Entry Presets:</div>
+        <div class="preset-chips">
+          <button type="button" class="chip" onclick="quickAddEntry('Morning Prep & Breakfast', '06:30', 30, 'routine')">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/><circle cx="12" cy="12" r="4"/></svg>
+            Morning Prep (30m)
+          </button>
+          <button type="button" class="chip" onclick="quickAddEntry('IELTS Essay Task 2 Drill', '07:00', 45, 'ielts')">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            IELTS Essay (45m)
+          </button>
+          <button type="button" class="chip" onclick="quickAddEntry('School / University Classes', '08:30', 300, 'fixed')">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            School Classes (5h)
+          </button>
+          <button type="button" class="chip" onclick="quickAddEntry('SAT Math: Desmos & Algebra', '14:00', 45, 'sat')">
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            SAT Math (45m)
+          </button>
+          <button type="button" class="chip" onclick="quickAddEntry('Portfolio Code Feature', '15:00', 60, 'code')">
+            <svg class="icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Code Feature (60m)
+          </button>
+          <button type="button" class="chip" onclick="quickAddEntry('Hydration & Rest Break', '16:00', 15, 'break')">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+            Rest Break (15m)
+          </button>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 4px;">
+          <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Entry to Timetable
+        </button>
+      </form>
+    </div>
+
+    <!-- Time Allocation Visual Bar -->
+    <div class="card" style="padding: 14px 20px;">
+      <div style="font-size: 0.82rem; font-weight: 700; display: flex; justify-content: space-between;">
+        <span>24-Hour Time Distribution (<span class="dayText">Monday</span>)</span>
+        <span id="summaryText">0.0 hrs total</span>
+      </div>
+      <div class="bar-container" id="distBar"></div>
+    </div>
+
+    <!-- Dynamic Master Timetable -->
+    <div class="card">
+      <div class="card-title">
+        <span style="display:flex; align-items:center; gap:8px;">
+          <svg class="icon" viewBox="0 0 24 24" style="color:var(--primary);"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Master Timetable (<span class="dayText">Monday</span>)
+        </span>
+        <span style="font-size:0.78rem; color:var(--text-muted); font-weight:500;" id="entryCountText">0 Entries</span>
+      </div>
+
+      <div class="timeline" id="timeline"></div>
+    </div>
+
+    <!-- Integrated Notes -->
+    <div class="card">
+      <div class="card-title" style="display:flex; align-items:center; gap:8px;">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Study Notes & Error Log
+      </div>
+      <textarea class="notes" id="notesArea" placeholder="Type vocabulary, SAT formulas, or project notes here... (Auto-saved)"></textarea>
+    </div>
+
+  </div>
+
+  <script>
+    let activeDay = 'monday';
+    const dayNames = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+    let schedules = {
+      monday: [
+        { id: 'e1', start: 390, dur: 30, title: 'Morning Prep & Breakfast', cat: 'routine', done: false },
+        { id: 'e2', start: 420, dur: 45, title: 'IELTS Academic Focus', cat: 'ielts', done: false },
+        { id: 'e3', start: 465, dur: 10, title: 'Rest Buffer', cat: 'break', done: false },
+        { id: 'e4', start: 510, dur: 300, title: 'School / Classes', cat: 'fixed', done: false },
+        { id: 'e5', start: 810, dur: 45, title: 'Digital SAT Prep', cat: 'sat', done: false },
+        { id: 'e6', start: 865, dur: 60, title: 'Portfolio Coding Sprint', cat: 'code', done: false }
+      ],
+      tuesday: [], wednesday: [], thursday: [], friday: [], saturday: [], sunday: []
+    };
+
+    // Load from LocalStorage
+    try {
+      const saved = localStorage.getItem('chrono_dynamic_schedules');
+      if (saved) schedules = JSON.parse(saved);
+    } catch(e) {}
+
+    let notes = localStorage.getItem('chrono_simple_notes') || '';
+    document.getElementById('notesArea').value = notes;
+    document.getElementById('notesArea').addEventListener('input', (e) => {
+      localStorage.setItem('chrono_simple_notes', e.target.value);
+    });
+
+    function saveSchedules() {
+      try {
+        localStorage.setItem('chrono_dynamic_schedules', JSON.stringify(schedules));
+      } catch(e) {}
+    }
+
+    // Theme Switcher
+    document.getElementById('themeBtn').addEventListener('click', () => {
+      if (document.body.getAttribute('data-theme') === 'light') {
+        document.body.removeAttribute('data-theme');
+      } else {
+        document.body.setAttribute('data-theme', 'light');
+      }
+    });
+
+    // Day Tabs Switcher
+    document.querySelectorAll('.day-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeDay = tab.getAttribute('data-day');
+        document.querySelectorAll('.dayText').forEach(el => el.textContent = activeDay.charAt(0).toUpperCase() + activeDay.slice(1));
+        renderTimeline();
+      });
+    });
+
+    function timeToMins(t) {
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m;
+    }
+
+    function minsToTime(m) {
+      const hh = String(Math.floor((m % 1440) / 60)).padStart(2, '0');
+      const mm = String(Math.floor(m % 60)).padStart(2, '0');
+      return `${hh}:${mm}`;
+    }
+
+    // Put In Entry Form Handler
+    document.getElementById('entryForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const title = document.getElementById('entryTitle').value.trim();
+      const startTimeStr = document.getElementById('entryStart').value;
+      const dur = parseInt(document.getElementById('entryDur').value);
+      const cat = document.getElementById('entryCat').value;
+
+      if (!title) return;
+
+      const start = timeToMins(startTimeStr);
+      addEntryToSchedule(title, start, dur, cat);
+
+      const nextStartMins = start + dur;
+      document.getElementById('entryStart').value = minsToTime(nextStartMins);
+      document.getElementById('entryTitle').value = '';
+      document.getElementById('entryTitle').focus();
+    });
+
+    function addEntryToSchedule(title, start, dur, cat) {
+      if (!schedules[activeDay]) schedules[activeDay] = [];
+
+      schedules[activeDay].push({
+        id: 'e_' + Math.random().toString(36).substr(2, 7),
+        start: start,
+        dur: dur,
+        title: title,
+        cat: cat,
+        done: false
+      });
+
+      schedules[activeDay].sort((a, b) => a.start - b.start);
+      saveSchedules();
+      renderTimeline();
+    }
+
+    function quickAddEntry(title, startTimeStr, dur, cat) {
+      const start = timeToMins(startTimeStr);
+      addEntryToSchedule(title, start, dur, cat);
+    }
+
+    function deleteEntry(id) {
+      schedules[activeDay] = (schedules[activeDay] || []).filter(item => item.id !== id);
+      saveSchedules();
+      renderTimeline();
+    }
+
+    document.getElementById('clearDayBtn').addEventListener('click', () => {
+      if (confirm(`Clear all entries for ${activeDay.toUpperCase()}?`)) {
+        schedules[activeDay] = [];
+        saveSchedules();
+        renderTimeline();
+      }
+    });
+
+    function renderTimeline() {
+      const container = document.getElementById('timeline');
+      container.innerHTML = '';
+
+      const list = schedules[activeDay] || [];
+      document.getElementById('entryCountText').textContent = `${list.length} ${list.length === 1 ? 'Entry' : 'Entries'}`;
+
+      const colors = { fixed: '#f87171', ielts: '#a78bfa', sat: '#fbbf24', code: '#34d399', routine: '#60a5fa', break: '#f472b6' };
+
+      // Calculate Total Hours
+      let totalMins = 0;
+      list.forEach(b => totalMins += b.dur);
+      document.getElementById('summaryText').textContent = `${(totalMins / 60).toFixed(1)} hrs total`;
+
+      // Render Visual Progress Bar
+      const distBar = document.getElementById('distBar');
+      distBar.innerHTML = '';
+      const totalSpan = list.length ? (list[list.length - 1].start + list[list.length - 1].dur - list[0].start) : 1;
+      
+      list.forEach(b => {
+        const seg = document.createElement('div');
+        seg.className = 'bar-seg';
+        seg.style.backgroundColor = colors[b.cat] || '#6366f1';
+        seg.style.width = `${(b.dur / totalSpan) * 100}%`;
+        distBar.appendChild(seg);
+      });
+
+      // Empty State
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            No entries put in for ${activeDay.toUpperCase()} yet.<br>
+            <span style="font-size:0.8rem; color:var(--text-muted);">Use the <strong>Put In New Entry</strong> form above to form your timetable.</span>
+          </div>
+        `;
+        return;
+      }
+
+      // Category Icon Map
+      const catIcons = {
+        ielts: `<svg class="icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`,
+        sat: `<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,
+        code: `<svg class="icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
+        fixed: `<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
+        routine: `<svg class="icon" viewBox="0 0 24 24"><path d="M12 2v2"/><path d="M12 20v2"/><circle cx="12" cy="12" r="4"/></svg>`,
+        break: `<svg class="icon" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>`
+      };
+
+      // Formed Timetable List Items
+      list.forEach(b => {
+        const item = document.createElement('div');
+        item.className = `item ${b.done ? 'done' : ''}`;
+        item.style.borderLeft = `4px solid ${colors[b.cat] || '#6366f1'}`;
+
+        item.innerHTML = `
+          <input type="checkbox" class="item-checkbox" ${b.done ? 'checked' : ''} onchange="toggleDone('${b.id}', this.checked)" title="Mark completed">
+          <div class="item-time">
+            <span>${minsToTime(b.start)} - ${minsToTime(b.start + b.dur)}</span>
+            <span class="item-dur">${b.dur} mins</span>
+          </div>
+          <div class="item-body">
+            <div class="item-title">
+              <span>${escapeHtml(b.title)}</span>
+              <span class="badge" style="background:${colors[b.cat]}22; color:${colors[b.cat]};">
+                ${catIcons[b.cat] || ''}
+                ${b.cat}
+              </span>
+            </div>
+          </div>
+          <div class="item-actions">
+            <button class="btn" style="padding:3px 8px; font-size:0.75rem;" onclick="shiftTime('${b.id}', -15)" title="Shift 15m earlier">-15m</button>
+            <button class="btn" style="padding:3px 8px; font-size:0.75rem;" onclick="shiftTime('${b.id}', 15)" title="Shift 15m later">+15m</button>
+            <button class="btn btn-danger" style="padding:3px 8px; font-size:0.75rem;" onclick="deleteEntry('${b.id}')" title="Delete entry">
+              <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+            </button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function toggleDone(id, isDone) {
+      const b = (schedules[activeDay] || []).find(x => x.id === id);
+      if (b) {
+        b.done = isDone;
+        saveSchedules();
+        renderTimeline();
+      }
+    }
+
+    function shiftTime(id, delta) {
+      const b = (schedules[activeDay] || []).find(x => x.id === id);
+      if (b) {
+        b.start = Math.max(0, b.start + delta);
+        schedules[activeDay].sort((a, b) => a.start - b.start);
+        saveSchedules();
+        renderTimeline();
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+    document.getElementById('copySummaryBtn').addEventListener('click', () => {
+      let txt = `# ChronoPrep ${activeDay.toUpperCase()} Schedule\n\n`;
+      (schedules[activeDay] || []).forEach(b => {
+        txt += `- ${minsToTime(b.start)} - ${minsToTime(b.start + b.dur)} | ${b.title} (${b.cat.toUpperCase()})\n`;
+      });
+      navigator.clipboard.writeText(txt).then(() => alert('Copied schedule to clipboard!'));
+    });
+
+    // Initial render
+    renderTimeline();
+  </script>
+</body>
+</html>
